@@ -1,6 +1,6 @@
 /**
  * AngularStrap - Twitter Bootstrap directives for AngularJS
- * @version v0.7.7 - 2013-10-04
+ * @version v0.7.7.1 - 2013-10-16
  * @link http://mgcrea.github.com/angular-strap
  * @author Olivier Louvignes <olivier@mg-crea.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -633,7 +633,7 @@
               content: template,
               html: true
             }));
-            var popover = element.data('popover');
+            var popover = element.data('bs.popover');
             popover.hasContent = function () {
               return this.getTitle() || template;
             };
@@ -679,10 +679,11 @@
         restrict: 'A',
         require: '?ngModel',
         link: function postLink(scope, element, attrs, controller) {
-          var options = scope.$eval(attrs.bsSelect) || {};
+          var options = scope.$eval(attrs.bsSelect) || {}, selectpicker;
           $timeout(function () {
             element.selectpicker(options);
-            element.next().removeClass('ng-scope');
+            selectpicker = element.next('.bootstrap-select');
+            selectpicker.removeClass('ng-scope');
           });
           if (controller) {
             var refresh = function (newValue, oldValue) {
@@ -690,6 +691,17 @@
                 element.selectpicker('refresh');
               }
             };
+            var checkValidity = function (value) {
+              if (selectpicker) {
+                selectpicker.toggleClass('ng-invalid', !controller.$valid).toggleClass('ng-valid', controller.$valid).toggleClass('ng-invalid-required', !controller.$valid).toggleClass('ng-valid-required', controller.$valid).toggleClass('ng-dirty', controller.$dirty).toggleClass('ng-pristine', controller.$pristine);
+              }
+              return value;
+            };
+            controller.$parsers.push(checkValidity);
+            controller.$formatters.push(checkValidity);
+            attrs.$observe('required', function () {
+              checkValidity(controller.$viewValue);
+            });
             scope.$watch(attrs.ngModel, function (newValue, oldValue) {
               refresh(newValue, oldValue);
             });
