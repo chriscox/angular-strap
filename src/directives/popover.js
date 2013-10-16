@@ -79,7 +79,7 @@ angular.module('$strap.directives')
         }));
 
         // Bootstrap override to provide tip() reference & compilation
-        var popover = element.data('popover');
+        var popover = element.data('bs.popover');
         popover.hasContent = function() {
           return this.getTitle() || template; // fix multiple $compile()
         };
